@@ -1,0 +1,31 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "2fbfb3f3-320a-42b4-a458-d3f1aa70c55a": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 401.001708984375,
+                    "y": 218.0052032470703
+                },
+                "z": 0
+            }
+        }
+    },
+    "Resources": {
+        "S3B1KBGY": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": "alinr-bucket1"
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "2fbfb3f3-320a-42b4-a458-d3f1aa70c55a"
+                }
+            }
+        }
+    }
+}

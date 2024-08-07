@@ -1,0 +1,76 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "2fbfb3f3-320a-42b4-a458-d3f1aa70c55a": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 890,
+                    "y": 370
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "dc921f04-2457-4847-9d43-359096a2f934": {
+                "size": {
+                    "width": 680,
+                    "height": 500
+                },
+                "position": {
+                    "x": 10,
+                    "y": 50
+                },
+                "z": 0,
+                "embeds": []
+            }
+        }
+    },
+    "Parameters":
+    "ProjectName": {
+        "Type": "String",
+        "Description": "Project name that will be the basis for all resource naming."
+        "Default:": "alinr"
+    }
+    "Resources": {
+        "S3B1KBGY": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Sub":[
+                        "${Prefix}-bucket1",
+                        {
+                            "Prefix": {
+                                "Ref":"ProjectName"
+                            }
+                        }
+                    ]
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "2fbfb3f3-320a-42b4-a458-d3f1aa70c55a"
+                }
+            }
+        },
+        "EC2VPC1I5G2": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "10.0.0.0/16"
+            },
+            "Tags": [
+                {
+                  "Key" : "Name",
+                  "Value" : "alinr-Network"
+                }
+            ],
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "dc921f04-2457-4847-9d43-359096a2f934"
+                }
+            }
+        }
+    }
+}

@@ -360,12 +360,7 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "VpcId": {"Ref": "EC2VPC1I5G2"},
-                "SecurityGroupIngress" : [
-                   {"Ref": "EC2SG4WFL1"},
-                   {"Ref": "EC2SG4WFL2"},
-                   {"Ref": "EC2SG4WFL3"},
-                   {"Ref": "EC2SG4WFL4"}
-                ],
+                "GroupDescription": "My security group",
                 "Tags": [
                     {
                         "Key": "Name",
@@ -393,8 +388,9 @@
             "Properties" : {
                 "CidrIp": "0.0.0.0/0",
                 "FromPort": 80,
+                "ToPort": 80,
                 "IpProtocol" : "tcp",
-                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+                "GroupId": { "Fn::GetAtt" : ["EC2SG4WHG7", "GroupId"] }
             }
         },
          "EC2SG4WFL2":  {
@@ -402,8 +398,9 @@
             "Properties" : {
                 "CidrIp": "0.0.0.0/0",
                 "FromPort": 443,
+                "ToPort": 443,
                 "IpProtocol" : "tcp",
-                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+                "GroupId": { "Fn::GetAtt" : ["EC2SG4WHG7", "GroupId"] }
             }
         },
          "EC2SG4WFL3":  {
@@ -411,8 +408,9 @@
             "Properties" : {
                 "CidrIp": "13.48.4.200/30",
                 "FromPort": 22,
+                "ToPort": 22,
                 "IpProtocol" : "tcp",
-                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+                "GroupId": { "Fn::GetAtt" : ["EC2SG4WHG7", "GroupId"] }
             }
         },
          "EC2SG4WFL4":  {
@@ -420,8 +418,9 @@
             "Properties" : {
                 "CidrIp": "0.0.0.0/0",
                 "FromPort": 8080,
+                "ToPort": 8080,
                 "IpProtocol" : "tcp",
-                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+                "GroupId": { "Fn::GetAtt" : ["EC2SG4WHG7", "GroupId"] }
             }
         },
         "EC2LT31OQK": {
@@ -430,23 +429,26 @@
                 "LaunchTemplateData": {
                     "ImageId": {"Ref": "alinrAMI"},
                     "InstanceType": {"Ref": "alinrInstanceType"},
-                    "SecurityGroupIds": [{"Ref": "EC2SG4WHG7"}]
+                    "SecurityGroupIds": [{ "Fn::GetAtt" : ["EC2SG4WHG7", "GroupId"] }]
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": [
-                                "${Prefix}-LaunchTemplate",
-                                {
-                                    "Prefix": {
-                                        "Ref": "ProjectName"
+                "TagSpecifications": [{
+                    "ResourceType": "launch-template",
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": {
+                                "Fn::Sub": [
+                                    "${Prefix}-LaunchTemplate",
+                                    {
+                                        "Prefix": {
+                                            "Ref": "ProjectName"
+                                        }
                                     }
-                                }
-                            ]
+                                ]
+                            }
                         }
-                    }
-                ]
+                    ]
+                }]
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
@@ -458,10 +460,14 @@
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
                 "VPCZoneIdentifier": [{"Ref": "EC2S13REU"}, {"Ref": "EC2SLLVA"}],
-                "LaunchTemplate": {"Ref": "EC2LT31OQK"},
+                "LaunchTemplate":  {
+                    "LaunchTemplateId": "EC2LT31OQK",
+                    "Version": { "Fn::GetAtt" : ["EC2LT31OQK", "LatestVersionNumber"] }
+                },
                 "DesiredCapacity": "0",
                 "MinSize": "0",
                 "MaxSize": "1",
+                "TargetGroupARNs": [{"Ref": "ELBV2TG2XIBJ"}],
                 "Tags": [
                     {
                         "Key": "Name",
@@ -474,7 +480,8 @@
                                     }
                                 }
                             ]
-                        }
+                        },
+                        "PropagateAtLaunch": "true"
                     }
                 ]
             },
@@ -523,6 +530,62 @@
                 "ComparisonOperator": "GreaterThanThreshold",
                 "MetricName": "CPUUtilization"
             }
+        },
+        "ELBV2LB2YV4U": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+                "Subnets": [
+                    {
+                        "Ref": "EC2S13REU"
+                    },
+                    {
+                        "Ref": "EC2SLLVA"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-LoadBalancer",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "54f48929-b31b-4ea8-81d0-0f5b50dc0e61"
+                }
+            }
+        },
+        "ELBV2L4Y9K1": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                 "DefaultActions": [ {"Type": "forward"} ],
+                 "LoadBalancerArn": {"Ref": "ELBV2LB2YV4U"},
+                 "TargetGroupArn": {"Ref": "ELBV2TG2XIBJ"}
+            }
+        },
+        "ELBV2TG2XIBJ": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "Properties": {
+                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "Port": "8080",
+                "Protocol": "HTTP"
+            }
+        }
+    },
+    "Outputs": {
+        "LoadBalancerUrl": {
+            "Description": "The URL of the ALB to access the Spring REST app.",
+            "Value": { "Fn::GetAtt" : ["ELBV2LB2YV4U", "DNSName"] }
+
         }
     }
 }

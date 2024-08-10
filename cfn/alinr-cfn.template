@@ -8,23 +8,303 @@
                     "height": 60
                 },
                 "position": {
-                    "x": 401.001708984375,
-                    "y": 218.0052032470703
+                    "x": 230,
+                    "y": 630
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "dc921f04-2457-4847-9d43-359096a2f934": {
+                "size": {
+                    "width": 680,
+                    "height": 500
+                },
+                "position": {
+                    "x": -460,
+                    "y": 480
+                },
+                "z": 0,
+                "embeds": [
+                    "ed4cda48-5d23-45bc-b725-ce861c02a1f0",
+                    "e2b16532-b05b-4c0a-87e4-f20216239cb8",
+                    "84cd23a7-e692-49f5-adec-21ffd34f7a3f",
+                    "8fe7d39d-73c3-43ea-b810-9ffc6f03c2c0"
+                ]
+            },
+            "ed4cda48-5d23-45bc-b725-ce861c02a1f0": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -460,
+                    "y": 540
+                },
+                "z": 1,
+                "parent": "dc921f04-2457-4847-9d43-359096a2f934",
+                "embeds": []
+            },
+            "e2b16532-b05b-4c0a-87e4-f20216239cb8": {
+                "size": {
+                    "width": 370,
+                    "height": 180
+                },
+                "position": {
+                    "x": -220,
+                    "y": 520
+                },
+                "z": 1,
+                "parent": "dc921f04-2457-4847-9d43-359096a2f934"
+            },
+            "84cd23a7-e692-49f5-adec-21ffd34f7a3f": {
+                "size": {
+                    "width": 370,
+                    "height": 180
+                },
+                "position": {
+                    "x": -220,
+                    "y": 770
+                },
+                "z": 1,
+                "parent": "dc921f04-2457-4847-9d43-359096a2f934"
+            },
+            "e4981cfb-8835-443c-92a6-3848e1aac8f6": {
+                "size": {
+                    "width": 140,
+                    "height": 140
+                },
+                "position": {
+                    "x": -485.8029831801885,
+                    "y": 691.0730726291573
                 },
                 "z": 0
+            },
+            "8fe7d39d-73c3-43ea-b810-9ffc6f03c2c0": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -446.85218288346124,
+                    "y": 688.9088891223533
+                },
+                "z": 1,
+                "parent": "dc921f04-2457-4847-9d43-359096a2f934"
             }
+        }
+    },
+    "Parameters": {
+        "ProjectName": {
+            "Type": "String",
+            "Description": "Project name that will be the basis for all resource naming.",
+            "Default": "alinr"
         }
     },
     "Resources": {
         "S3B1KBGY": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-                "BucketName": "alinr-bucket1"
+                "BucketName": {
+                    "Fn::Sub": [
+                        "${Prefix}-bucket1",
+                        {
+                            "Prefix": {
+                                "Ref": "ProjectName"
+                            }
+                        }
+                    ]
+                }
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
                     "id": "2fbfb3f3-320a-42b4-a458-d3f1aa70c55a"
                 }
+            }
+        },
+        "EC2VPC1I5G2": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "10.0.0.0/16",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-Network",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "dc921f04-2457-4847-9d43-359096a2f934"
+                }
+            }
+        },
+        "EC2IG250TJ": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-InternetGateway",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "ed4cda48-5d23-45bc-b725-ce861c02a1f0"
+                }
+            }
+        },
+        "EC2IG251SK": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "InternetGatewayId": {"Ref": "EC2IG250TJ"},
+                "VpcId": {"Ref": "EC2VPC1I5G2"}
+            }
+        },
+        "EC2S13REU": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": "10.0.11.0/24",
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        0,
+                        {
+                            "Fn::GetAZs": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ]
+                },
+                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-PublicSubnet-A",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "e2b16532-b05b-4c0a-87e4-f20216239cb8"
+                }
+            }
+        },
+        "EC2SLLVA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": "10.0.12.0/24",
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        1,
+                        {
+                            "Fn::GetAZs": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ]
+                },
+                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-PublicSubnet-B",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "84cd23a7-e692-49f5-adec-21ffd34f7a3f"
+                }
+            }
+        },
+        "EC2RTC5ZG": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-RouteTable",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "e4981cfb-8835-443c-92a6-3848e1aac8f6"
+                }
+            }
+        },
+        "EC2R1TB79": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn" : ["EC2IG250TJ", "EC2RTC5ZG"],
+            "Properties": {
+                "GatewayId": {"Ref": "EC2IG250TJ"},
+                "RouteTableId": {"Ref": "EC2RTC5ZG"},
+                "DestinationCidrBlock": "0.0.0.0/0"
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "8fe7d39d-73c3-43ea-b810-9ffc6f03c2c0"
+                }
+            }
+        },
+        "EC2R1SF13": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "RouteTableId" : {"Ref": "EC2RTC5ZG"},
+                "SubnetId" : {"Ref": "EC2S13REU"}
+            }
+        },
+        "EC2R1SF14": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "RouteTableId" : {"Ref": "EC2RTC5ZG"},
+                "SubnetId" : {"Ref": "EC2SLLVA"}
             }
         }
     }

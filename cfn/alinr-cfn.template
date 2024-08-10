@@ -26,9 +26,10 @@
                 "z": 0,
                 "embeds": [
                     "ed4cda48-5d23-45bc-b725-ce861c02a1f0",
-                    "e2b16532-b05b-4c0a-87e4-f20216239cb8",
+                    "8fe7d39d-73c3-43ea-b810-9ffc6f03c2c0",
                     "84cd23a7-e692-49f5-adec-21ffd34f7a3f",
-                    "8fe7d39d-73c3-43ea-b810-9ffc6f03c2c0"
+                    "e2b16532-b05b-4c0a-87e4-f20216239cb8",
+                    "0e5b3cb4-cc7f-4d8f-a74f-e4d35cbdd82c"
                 ]
             },
             "ed4cda48-5d23-45bc-b725-ce861c02a1f0": {
@@ -90,6 +91,18 @@
                 },
                 "z": 1,
                 "parent": "dc921f04-2457-4847-9d43-359096a2f934"
+            },
+            "0e5b3cb4-cc7f-4d8f-a74f-e4d35cbdd82c": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -359.131708164124,
+                    "y": 870.6811817474307
+                },
+                "z": 1,
+                "parent": "dc921f04-2457-4847-9d43-359096a2f934"
             }
         }
     },
@@ -98,6 +111,17 @@
             "Type": "String",
             "Description": "Project name that will be the basis for all resource naming.",
             "Default": "alinr"
+        },
+        "alinrAMI": {
+            "Type": "String",
+            "Description": "AMI with Spring REST application.",
+            "Default": "ami-0e1aeb315fa9bb536"
+        },
+        "alinrInstanceType": {
+            "Description" : "EC2 Instance Type",
+            "Type" : "String",
+            "Default" : "t3.micro",
+            "AllowedValues": ["t2.micro", "t3.micro"]
         }
     },
     "Resources": {
@@ -175,8 +199,12 @@
         "EC2IG251SK": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
             "Properties": {
-                "InternetGatewayId": {"Ref": "EC2IG250TJ"},
-                "VpcId": {"Ref": "EC2VPC1I5G2"}
+                "InternetGatewayId": {
+                    "Ref": "EC2IG250TJ"
+                },
+                "VpcId": {
+                    "Ref": "EC2VPC1I5G2"
+                }
             }
         },
         "EC2S13REU": {
@@ -193,7 +221,9 @@
                         }
                     ]
                 },
-                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "VpcId": {
+                    "Ref": "EC2VPC1I5G2"
+                },
                 "Tags": [
                     {
                         "Key": "Name",
@@ -230,7 +260,9 @@
                         }
                     ]
                 },
-                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "VpcId": {
+                    "Ref": "EC2VPC1I5G2"
+                },
                 "Tags": [
                     {
                         "Key": "Name",
@@ -256,7 +288,9 @@
         "EC2RTC5ZG": {
             "Type": "AWS::EC2::RouteTable",
             "Properties": {
-                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "VpcId": {
+                    "Ref": "EC2VPC1I5G2"
+                },
                 "Tags": [
                     {
                         "Key": "Name",
@@ -281,10 +315,17 @@
         },
         "EC2R1TB79": {
             "Type": "AWS::EC2::Route",
-            "DependsOn" : ["EC2IG250TJ", "EC2RTC5ZG"],
+            "DependsOn": [
+                "EC2IG250TJ",
+                "EC2RTC5ZG"
+            ],
             "Properties": {
-                "GatewayId": {"Ref": "EC2IG250TJ"},
-                "RouteTableId": {"Ref": "EC2RTC5ZG"},
+                "GatewayId": {
+                    "Ref": "EC2IG250TJ"
+                },
+                "RouteTableId": {
+                    "Ref": "EC2RTC5ZG"
+                },
                 "DestinationCidrBlock": "0.0.0.0/0"
             },
             "Metadata": {
@@ -294,17 +335,153 @@
             }
         },
         "EC2R1SF13": {
-            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties" : {
-                "RouteTableId" : {"Ref": "EC2RTC5ZG"},
-                "SubnetId" : {"Ref": "EC2S13REU"}
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "EC2RTC5ZG"
+                },
+                "SubnetId": {
+                    "Ref": "EC2S13REU"
+                }
             }
         },
         "EC2R1SF14": {
-            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "EC2RTC5ZG"
+                },
+                "SubnetId": {
+                    "Ref": "EC2SLLVA"
+                }
+            }
+        },
+        "EC2SG4WHG7": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "VpcId": {"Ref": "EC2VPC1I5G2"},
+                "SecurityGroupIngress" : [
+                   {"Ref": "EC2SG4WFL1"},
+                   {"Ref": "EC2SG4WFL2"},
+                   {"Ref": "EC2SG4WFL3"},
+                   {"Ref": "EC2SG4WFL4"}
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-SecGr1",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "0e5b3cb4-cc7f-4d8f-a74f-e4d35cbdd82c"
+                }
+            }
+        },
+        "EC2SG4WFL1":  {
+            "Type" : "AWS::EC2::SecurityGroupIngress",
             "Properties" : {
-                "RouteTableId" : {"Ref": "EC2RTC5ZG"},
-                "SubnetId" : {"Ref": "EC2SLLVA"}
+                "CidrIp": "0.0.0.0/0",
+                "FromPort": 80,
+                "IpProtocol" : "tcp",
+                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+            }
+        },
+         "EC2SG4WFL2":  {
+            "Type" : "AWS::EC2::SecurityGroupIngress",
+            "Properties" : {
+                "CidrIp": "0.0.0.0/0",
+                "FromPort": 443,
+                "IpProtocol" : "tcp",
+                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+            }
+        },
+         "EC2SG4WFL3":  {
+            "Type" : "AWS::EC2::SecurityGroupIngress",
+            "Properties" : {
+                "CidrIp": "13.48.4.200/30",
+                "FromPort": 22,
+                "IpProtocol" : "tcp",
+                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+            }
+        },
+         "EC2SG4WFL4":  {
+            "Type" : "AWS::EC2::SecurityGroupIngress",
+            "Properties" : {
+                "CidrIp": "0.0.0.0/0",
+                "FromPort": 8080,
+                "IpProtocol" : "tcp",
+                "SourceSecurityGroupId": {"Ref": "EC2VPC1I5G2"}
+            }
+        },
+        "EC2LT31OQK": {
+            "Type": "AWS::EC2::LaunchTemplate",
+            "Properties": {
+                "LaunchTemplateData": {
+                    "ImageId": {"Ref": "alinrAMI"},
+                    "InstanceType": {"Ref": "alinrInstanceType"},
+                    "SecurityGroupIds": [{"Ref": "EC2SG4WHG7"}]
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-LaunchTemplate",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "e8d45ea0-1f24-4e38-926a-7e0be4eaea6f"
+                }
+            }
+        },
+        "ASASGHIEW": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "VPCZoneIdentifier": [{"Ref": "EC2S13REU"}, {"Ref": "EC2SLLVA"}],
+                "LaunchTemplate": {"Ref": "EC2LT31OQK"},
+                "DesiredCapacity": "0",
+                "MinSize": "0",
+                "MaxSize": "1",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": [
+                                "${Prefix}-AutoScalingGroup",
+                                {
+                                    "Prefix": {
+                                        "Ref": "ProjectName"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "e8267637-c85b-4ed6-829f-d353744c6167"
+                }
             }
         }
     }

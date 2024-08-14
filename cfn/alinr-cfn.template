@@ -461,7 +461,7 @@
             "Properties": {
                 "VPCZoneIdentifier": [{"Ref": "EC2S13REU"}, {"Ref": "EC2SLLVA"}],
                 "LaunchTemplate":  {
-                    "LaunchTemplateId": "EC2LT31OQK",
+                    "LaunchTemplateId": {"Ref":"EC2LT31OQK"},
                     "Version": { "Fn::GetAtt" : ["EC2LT31OQK", "LatestVersionNumber"] }
                 },
                 "DesiredCapacity": "0",
@@ -567,9 +567,15 @@
         "ELBV2L4Y9K1": {
             "Type": "AWS::ElasticLoadBalancingV2::Listener",
             "Properties": {
-                 "DefaultActions": [ {"Type": "forward"} ],
-                 "LoadBalancerArn": {"Ref": "ELBV2LB2YV4U"},
-                 "TargetGroupArn": {"Ref": "ELBV2TG2XIBJ"}
+                "DefaultActions": [
+                    {
+                        "Type": "forward", 
+                        "TargetGroupArn": {"Ref": "ELBV2TG2XIBJ"}
+                    }
+                ],
+                "LoadBalancerArn": {"Ref": "ELBV2LB2YV4U"},
+                "Port": 80,
+                "Protocol": "HTTP"
             }
         },
         "ELBV2TG2XIBJ": {

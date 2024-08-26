@@ -9,6 +9,16 @@
             "projectName": "rest-api-initial",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<ec2-rest>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.Application",
+            "projectName": "ec2-rest",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

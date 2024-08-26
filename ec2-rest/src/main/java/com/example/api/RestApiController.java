@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.service.AwsEc2Service;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/ec2")
 public class RestApiController {
 
 	private AwsEc2Service awsEc2Service;

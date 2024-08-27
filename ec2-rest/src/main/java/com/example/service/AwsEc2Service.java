@@ -10,7 +10,7 @@ import software.amazon.awssdk.imds.Ec2MetadataResponse;
 public class AwsEc2Service {
 
     public String getRegion() {
-       return retrieveMetadata("region");
+        return retrieveMetadata("region");
     }
 
     public String getAZ() {
@@ -19,8 +19,7 @@ public class AwsEc2Service {
 
     private String retrieveMetadata(String key) {
         Ec2MetadataClient client = Ec2MetadataClient.create();
-        Ec2MetadataResponse response = 
-        client.get("/latest/dynamic/instance-identity/document");
+        Ec2MetadataResponse response = client.get("/latest/dynamic/instance-identity/document");
         Document instanceInfo = response.asDocument();
         return instanceInfo.asMap().get(key).asString();
     }

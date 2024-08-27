@@ -1,0 +1,37 @@
+// connect to EC2 instance
+
+sudo dnf install postgresql15
+
+psql \
+   --host=db1.c7abcde7ie47.eu-north-1.rds.amazonaws.com \
+   --port=5432 \
+   --username=postgres \
+   --password \
+   --dbname=postgres
+
+CREATE TABLE api_images (
+name TEXT PRIMARY KEY,
+lastUpdated TEXT, 
+extension TEXT,
+size FLOAT4);
+
+insert into api_images (name, lastUpdated, extension, size) values ('file1.bin', '2024-08-27T09:44:14Z', 'application/octet-stream', 14.675);
+
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+         "Effect": "Allow",
+         "Action": [
+             "rds-db:connect"
+         ],
+         "Resource": [
+             "arn:aws:rds-db:eu-north-1:123456789012:dbuser:*/db_userx"
+         ]
+      }
+   ]
+}
+
+>psql
+CREATE USER db_userx; 
+GRANT rds_iam TO db_userx;

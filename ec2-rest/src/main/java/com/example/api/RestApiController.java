@@ -26,7 +26,7 @@ public class RestApiController {
 		return awsEc2Service.getRegion();
 	}
 
-    @GetMapping("/az")
+	@GetMapping("/az")
 	public String getAZ() {
 		return awsEc2Service.getAZ();
 	}

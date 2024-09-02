@@ -35,7 +35,7 @@ public class AwsS3Service {
             var metadata = new S3Metadata(
                     prefixedKey,
                     headObjectResponse.lastModified().toString(),
-                    headObjectResponse.contentType(),
+                    getExtension(key),
                     headObjectResponse.contentLength() / 1024.0);
             return metadata;
         }
@@ -61,6 +61,14 @@ public class AwsS3Service {
 
     private String getPrefixedKey(String key) {
         return PREFIX + "/" + key;
+    }
+
+    private String getExtension(String key) {
+        int i = key.lastIndexOf('.');
+        if (i > 0) {
+            return key.substring(i + 1);
+        }
+        return "";
     }
 
     private S3Client getS3Client() {

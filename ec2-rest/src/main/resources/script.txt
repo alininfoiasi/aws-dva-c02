@@ -3,7 +3,7 @@
 sudo dnf install postgresql15
 
 psql \
-   --host=db1.c7abcde7ie47.eu-north-1.rds.amazonaws.com \
+   --host=database-1.foobar123.eu-north-1.rds.amazonaws.com \
    --port=5432 \
    --username=postgres \
    --password \
@@ -16,6 +16,15 @@ extension TEXT,
 size FLOAT4);
 
 insert into api_images (name, lastUpdated, extension, size) values ('file1.bin', '2024-08-27T09:44:14Z', 'application/octet-stream', 14.675);
+
+
+CREATE TABLE api_subscriptions (
+arn TEXT PRIMARY KEY,
+email TEXT,
+unsubscribed BOOLEAN);
+
+insert into api_subscriptions (arn, email, unsubscribed) values ('arn', 'foo@bar.com', FALSE);
+
 
 {
    "Version": "2012-10-17",

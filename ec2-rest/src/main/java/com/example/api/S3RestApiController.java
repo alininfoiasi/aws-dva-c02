@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.model.S3Metadata;
 import com.example.persistence.AwsRdsService;
 import com.example.service.AwsS3Service;
+import com.example.service.AwsSqsService;
 
 @RestController
 @RequestMapping("/api/s3")
@@ -23,10 +24,12 @@ public class S3RestApiController {
 
 	private AwsS3Service awsS3Service;
 	private AwsRdsService awsRdsService;
+	private AwsSqsService awsSqsService;
 
-	public S3RestApiController(AwsS3Service awsS3Service, AwsRdsService awsRdsService) {
+	public S3RestApiController(AwsS3Service awsS3Service, AwsRdsService awsRdsService, AwsSqsService awsSqsService) {
 		this.awsS3Service = awsS3Service;
 		this.awsRdsService = awsRdsService;
+		this.awsSqsService = awsSqsService;
 	}
 
 	@GetMapping
@@ -36,23 +39,18 @@ public class S3RestApiController {
 
 	@GetMapping("/metadata")
 	public S3Metadata getMetadata(@RequestParam String file) {
-		S3Metadata s3Metadata = awsRdsService.getMetadata(file);
-		if (s3Metadata != null) {
-			return s3Metadata;
-		} else {
-			s3Metadata = awsS3Service.getMetadata(file);
-			awsRdsService.saveMetadata(s3Metadata);
-			return awsRdsService.getMetadata(file);
-		}
+		return awsRdsService.getMetadata(file);
 	}
 
 	@PostMapping("/uploads")
 	public ResponseEntity<?> uploadFile(@RequestParam String file,
 			@RequestParam(name = "fileContents") MultipartFile fileContents) {
 		if (awsS3Service.upload(file, fileContents)) {
+			S3Metadata s3Metadata = awsS3Service.getMetadata(file);
+			awsRdsService.saveMetadata(s3Metadata);
+			awsSqsService.sendMessage(s3Metadata.name(), s3Metadata.extension());
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
-		;
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 

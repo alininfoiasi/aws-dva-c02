@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.model.S3Metadata;
 import com.example.persistence.AwsRdsService;
+import com.example.service.AwsLambdaService;
 import com.example.service.AwsS3Service;
 import com.example.service.AwsSqsService;
 
@@ -25,11 +26,13 @@ public class S3RestApiController {
 	private AwsS3Service awsS3Service;
 	private AwsRdsService awsRdsService;
 	private AwsSqsService awsSqsService;
+	private AwsLambdaService awsLambdaService;
 
-	public S3RestApiController(AwsS3Service awsS3Service, AwsRdsService awsRdsService, AwsSqsService awsSqsService) {
+	public S3RestApiController(AwsS3Service awsS3Service, AwsRdsService awsRdsService, AwsSqsService awsSqsService, AwsLambdaService awsLambdaService) {
 		this.awsS3Service = awsS3Service;
 		this.awsRdsService = awsRdsService;
 		this.awsSqsService = awsSqsService;
+		this.awsLambdaService = awsLambdaService;
 	}
 
 	@GetMapping
@@ -48,7 +51,7 @@ public class S3RestApiController {
 		if (awsS3Service.upload(file, fileContents)) {
 			S3Metadata s3Metadata = awsS3Service.getMetadata(file);
 			awsRdsService.saveMetadata(s3Metadata);
-			awsSqsService.sendMessage(s3Metadata.name(), s3Metadata.extension());
+			awsSqsService.sendMessage(s3Metadata);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -66,6 +69,16 @@ public class S3RestApiController {
 									.filename(file)
 									.build().toString())
 					.body(new ByteArrayResource(fileContents));
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@GetMapping("/inconsistency")
+	public ResponseEntity<?> checkInconsistencies() {
+		String result = awsLambdaService.invokeLambda();
+		if (result != null) {
+			return ResponseEntity.ok()
+					.body(result);
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.model.S3Metadata;
+
 import software.amazon.awssdk.regions.Region;
 
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -21,8 +23,9 @@ public class AwsSqsService {
     private static final String QUEUE_NAME = "SQS-api_images";
     private static final Region REGION = Region.EU_NORTH_1;
 
-    public boolean sendMessage(String message, String extension) {
+    public boolean sendMessage(S3Metadata s3Metadata) {
         SqsClient sqsClient = getSqsClient();
+        String message = getS3MetadataMessage(s3Metadata);
         try {
             GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
                     .queueName(QUEUE_NAME)
@@ -83,5 +86,15 @@ public class AwsSqsService {
         return SqsClient.builder()
                 .region(REGION)
                 .build();
+    }
+
+    private String getS3MetadataMessage(S3Metadata s3Metadata) {
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("A new image has been uploaded.");
+        messageBuilder.append(System.getProperty("line.separator"));
+        messageBuilder.append(s3Metadata.toString());
+        messageBuilder.append(System.getProperty("line.separator"));
+        messageBuilder.append("Download link: <ec2-url>/api/s3/downloads?file=" + s3Metadata.name());
+        return messageBuilder.toString();
     }
 }

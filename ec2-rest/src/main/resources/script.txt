@@ -17,6 +17,9 @@ size FLOAT4);
 
 insert into api_images (name, lastUpdated, extension, size) values ('file1.bin', '2024-08-27T09:44:14Z', 'application/octet-stream', 14.675);
 
+// introduce metadata inconsistency
+update api_images set size = 111.222 where name = 'api_images/img1.png';
+
 
 CREATE TABLE api_subscriptions (
 arn TEXT PRIMARY KEY,
@@ -44,3 +47,6 @@ insert into api_subscriptions (arn, email, unsubscribed) values ('arn', 'foo@bar
 >psql
 CREATE USER db_userx; 
 GRANT rds_iam TO db_userx;
+
+// make sure a Lambda function running inside a VPC accesses resources like S3 privately via an endpoint (also check route tables, subnets, SGs).
+

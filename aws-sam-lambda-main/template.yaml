@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SAM Template for lambda function to trigger S3 image upload notifications
+
+Globals:
+  Function:
+    Timeout: 25
+
+Parameters:
+  SnsArn:
+    Type: String
+    Default: "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-api_images"
+  SqsArn:
+    Type: String
+    Default: "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-api_images"
+
+Resources:
+  NotificationLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: code/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          SNSARN: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-api_images"
+      Policies:
+        - CloudWatchPutMetricPolicy: {}
+        - AmazonSNSFullAccess
+        - AmazonSQSFullAccess
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-api_images"
+            BatchSize: 10
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Canary10Percent5Minutes

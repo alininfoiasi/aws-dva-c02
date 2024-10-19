@@ -23,7 +23,7 @@ import com.example.model.S3Metadata;
 @Service
 public class AwsS3Service {
 
-    private static final String BUCKET_NAME = "alinr-bucket";
+    private static final String BUCKET_NAME = "dvac02-bucket";
     private static final String PREFIX = "api_images";
     private static final Region REGION = Region.EU_NORTH_1;
 
